@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:shopping_list/screens/profile_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shopping_list/screens/register_page.dart';
 
@@ -24,42 +23,37 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-Future<void> _signIn() async {
-  final email = _emailCtrl.text.trim();
-  final password = _passwordCtrl.text;
+  Future<void> _signIn() async {
+    final email = _emailCtrl.text.trim();
+    final password = _passwordCtrl.text;
 
-  if (email.isEmpty || password.isEmpty) {
-    setState(() => _error = 'Please fill in email and password.');
-    return;
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _error = 'Please fill in email and password.');
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final supabase = Supabase.instance.client;
+      await supabase.auth.signInWithPassword(email: email, password: password);
+
+      if (!mounted) return;
+      Navigator.pop(context); // back to the previous screen (home)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logged in successfully')),
+      );
+    } on AuthException catch (e) {
+      setState(() => _error = e.message);
+    } catch (_) {
+      setState(() => _error = 'Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
-
-  setState(() {
-    _loading = true;
-    _error = null;
-  });
-
-  try {
-    final supabase = Supabase.instance.client;
-    await supabase.auth.signInWithPassword(email: email, password: password);
-
-    if (!mounted) return;
-    // ✅ Instead of popping back, replace with ProfilePage
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const ProfilePage()),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Logged in successfully')),
-    );
-  } on AuthException catch (e) {
-    setState(() => _error = e.message);
-  } catch (_) {
-    setState(() => _error = 'Something went wrong. Please try again.');
-  } finally {
-    if (mounted) setState(() => _loading = false);
-  }
-}
 
   @override
   Widget build(BuildContext context) {
