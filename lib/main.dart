@@ -1,4 +1,4 @@
-import 'package:shopping_list/services/auth_gate.dart';
+import 'package:shopping_list/screens/auth_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/shopping_list_page.dart';
